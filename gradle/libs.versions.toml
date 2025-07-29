@@ -1,0 +1,102 @@
+# =============================================================================
+# libs.versions.toml
+# 目的:
+# - 依存関係のバージョンを一元管理（Version Catalog）
+# - Compose は BOM で整合性を担保（個々のCompose依存は version を書かない）
+# - 「用途ごと」に見つけやすいよう整理
+# =============================================================================
+
+[versions]
+# ---- ビルドツール / Kotlin ---------------------------------------------------
+agp = "8.10.1"              # Android Gradle Plugin
+kotlin = "2.0.21"           # Kotlin（Compose Compiler 連携は kotlin-compose プラグインで自動整合）
+
+# ---- AndroidX 基本 / Activity ------------------------------------------------
+coreKtx = "1.16.0"          # Kotlin 拡張（Context.ext など）
+activityCompose = "1.10.1"  # Compose 用 Activity（ActivityResult API 等も新しめ）
+
+# ---- Lifecycle / コルーチン --------------------------------------------------
+lifecycleRuntimeKtx = "2.9.2"  # Lifecycle (RuntimeKtx)。他のLifecycle系もこれに合わせる想定
+coroutines = "1.8.1"           # kotlinx-coroutines-android
+
+# ---- Compose BOM -------------------------------------------------------------
+# Compose ライブラリ群のバージョン整合は BOM で実施
+composeBom = "2024.09.00"
+
+# ---- テスト系 ----------------------------------------------------------------
+junit = "4.13.2"            # JVM 単体テスト（JUnit4）
+junitVersion = "1.2.1"      # AndroidX Test Ext JUnit (androidx.test.ext:junit)
+espressoCore = "3.6.1"      # Espresso UI テスト (androidx.test.espresso:espresso-core)
+
+
+[libraries]
+# =============================================================================
+# AndroidX 基本 / Activity
+# =============================================================================
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+
+# Activity（Compose 用）
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+
+# （任意）従来の拡張APIが必要な場合は activity-ktx も利用可
+# 例: import androidx.activity:activity-ktx
+androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activityCompose" }
+
+# =============================================================================
+# Lifecycle / コルーチン
+# =============================================================================
+# ランタイムKTX（Dispatchers.Main + lifecycleScope 等）
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+
+# （任意）ViewModel + Coroutine サポートが必要なら追加
+androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleRuntimeKtx" }
+
+# （任意）Compose の Lifecycle 連携（rememberLifecycleOwner 等が不要であれば省略可）
+androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeKtx" }
+
+# Kotlin Coroutines（Android Dispatcher）
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+
+# =============================================================================
+# Jetpack Compose（一式は BOM に従うため version 未指定）
+# =============================================================================
+# --- BOM（必ず最初に）---
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+
+# --- UI 基本 ---
+androidx-ui =               { group = "androidx.compose.ui", name = "ui" }
+androidx-ui-graphics =      { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-ui-tooling =       { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-ui-tooling-preview ={ group = "androidx.compose.ui", name = "ui-tooling-preview" }
+
+# KeyboardOptions / KeyboardType など（import androidx.compose.ui.text.input.*）
+androidx-ui-text =          { group = "androidx.compose.ui", name = "ui-text" }
+
+# スクロール/レイアウト基盤など（Column/Row/Box 等の実装強化。必要に応じて）
+androidx-foundation =       { group = "androidx.compose.foundation", name = "foundation" }
+
+# Material 3 コンポーネント
+androidx-material3 =        { group = "androidx.compose.material3", name = "material3" }
+
+# rememberSaveable（状態保存）
+androidx-runtime-saveable = { group = "androidx.compose.runtime", name = "runtime-saveable" }
+
+# --- UI テスト（BOMに従う）---
+androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-ui-test-junit4 =   { group = "androidx.compose.ui", name = "ui-test-junit4" }
+
+# =============================================================================
+# テスト（JVM / Android）
+# =============================================================================
+junit =              { group = "junit",               name = "junit",        version.ref = "junit" }
+androidx-junit =     { group = "androidx.test.ext",   name = "junit",        version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+
+
+[plugins]
+# =============================================================================
+# Gradle プラグイン（バージョンは versions セクションで管理）
+# =============================================================================
+android-application = { id = "com.android.application",            version.ref = "agp" }
+kotlin-android       = { id = "org.jetbrains.kotlin.android",      version.ref = "kotlin" }
+kotlin-compose       = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
